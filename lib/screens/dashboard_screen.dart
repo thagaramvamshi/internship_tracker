@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/internship_provider.dart';
+import '../widgets/application_card.dart';
+import '../widgets/stat_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -54,47 +56,66 @@ class DashboardScreen extends StatelessWidget {
               builder: (context, constraints) {
                 final columns = constraints.maxWidth >= 600 ? 3 : 2;
                 final cardWidth =
-                    (constraints.maxWidth - (columns - 1) * 12) / columns;
+                    (constraints.maxWidth - (columns - 1) * 12) /
+                        columns;
 
                 return Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    _StatCard(
-                      title: 'Total',
-                      count: provider.totalCount,
-                      icon: Icons.work_outline,
+                    SizedBox(
                       width: cardWidth,
+                      child: StatCard(
+  title: 'Total',
+  count: provider.totalCount,
+  icon: Icons.work_outline,
+  color: const Color(0xFF4F46E5),
+),
                     ),
-                    _StatCard(
-                      title: 'Applied',
-                      count: provider.appliedCount,
-                      icon: Icons.send_outlined,
+                    SizedBox(
                       width: cardWidth,
+                      child: StatCard(
+                        title: 'Applied',
+                        count: provider.appliedCount,
+                        icon: Icons.send_outlined,
+                        color: Colors.blue,
+                      ),
                     ),
-                    _StatCard(
-                      title: 'Interviews',
-                      count: provider.interviewCount,
-                      icon: Icons.groups_outlined,
+                    SizedBox(
                       width: cardWidth,
+                      child: StatCard(
+                        title: 'Interviews',
+                        count: provider.interviewCount,
+                        icon: Icons.groups_outlined,
+                        color: Colors.purple,
+                      ),
                     ),
-                    _StatCard(
-                      title: 'Assessments',
-                      count: provider.assessmentCount,
-                      icon: Icons.assignment_outlined,
+                    SizedBox(
                       width: cardWidth,
+                      child: StatCard(
+                        title: 'Assessments',
+                        count: provider.assessmentCount,
+                        icon: Icons.assignment_outlined,
+                        color: Colors.orange,
+                      ),
                     ),
-                    _StatCard(
-                      title: 'Selected',
-                      count: provider.selectedCount,
-                      icon: Icons.check_circle_outline,
+                    SizedBox(
                       width: cardWidth,
+                      child: StatCard(
+                        title: 'Selected',
+                        count: provider.selectedCount,
+                        icon: Icons.check_circle_outline,
+                        color: Colors.green,
+                      ),
                     ),
-                    _StatCard(
-                      title: 'Rejected',
-                      count: provider.rejectedCount,
-                      icon: Icons.cancel_outlined,
+                    SizedBox(
                       width: cardWidth,
+                      child: StatCard(
+                        title: 'Rejected',
+                        count: provider.rejectedCount,
+                        icon: Icons.cancel_outlined,
+                        color: Colors.red,
+                      ),
                     ),
                   ],
                 );
@@ -105,14 +126,21 @@ class DashboardScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                  colors: [
+                    Color(0xFF4F46E5),
+                    Color(0xFF7C3AED),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.rocket_launch, color: Colors.white, size: 30),
+                  Icon(
+                    Icons.rocket_launch,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                   SizedBox(height: 12),
                   Text(
                     'Keep moving forward!',
@@ -124,7 +152,8 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Track every application and take the next step toward your dream internship.',
+                    'Track every application and take the next step '
+                    'toward your dream internship.',
                     style: TextStyle(
                       color: Colors.white70,
                       height: 1.5,
@@ -171,73 +200,14 @@ class DashboardScreen extends StatelessWidget {
               )
             else
               ...provider.internships.reversed.take(5).map(
-                    (internship) => Card(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.business_outlined),
-                        ),
-                        title: Text(
-                          internship.company,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(internship.role),
-                        trailing: Text(
-                          internship.status.name.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    (internship) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: ApplicationCard(
+                        internship: internship,
                       ),
                     ),
                   ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final int count;
-  final IconData icon;
-  final double width;
-
-  const _StatCard({
-    required this.title,
-    required this.count,
-    required this.icon,
-    required this.width,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: const Color(0xFF4F46E5), size: 25),
-              const SizedBox(height: 18),
-              Text(
-                '$count',
-                style: const TextStyle(
-                  fontSize: 27,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: const TextStyle(color: Color(0xFF64748B)),
-              ),
-            ],
-          ),
         ),
       ),
     );

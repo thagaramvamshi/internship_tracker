@@ -4,8 +4,16 @@ import 'package:provider/provider.dart';
 
 import '../models/internship.dart';
 import '../providers/internship_provider.dart';
+import '../widgets/application_card.dart';
 import 'add_internship_screen.dart';
 import 'edit_internship_screen.dart';
+import 'internship_details_screen.dart';
+
+enum ApplicationSort {
+  newest,
+  oldest,
+  companyAZ,
+}
 
 class ApplicationsScreen extends StatefulWidget {
   const ApplicationsScreen({super.key});
@@ -17,6 +25,8 @@ class ApplicationsScreen extends StatefulWidget {
 
 class _ApplicationsScreenState extends State<ApplicationsScreen> {
   InternshipStatus? _selectedStatus;
+  ApplicationSort _sort = ApplicationSort.newest;
+  String _searchQuery = '';
 
   String _statusLabel(InternshipStatus status) {
     switch (status) {
@@ -30,21 +40,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
         return 'Selected';
       case InternshipStatus.rejected:
         return 'Rejected';
-    }
-  }
-
-  Color _statusColor(InternshipStatus status) {
-    switch (status) {
-      case InternshipStatus.applied:
-        return Colors.blue;
-      case InternshipStatus.assessment:
-        return Colors.orange;
-      case InternshipStatus.interview:
-        return Colors.purple;
-      case InternshipStatus.selected:
-        return Colors.green;
-      case InternshipStatus.rejected:
-        return Colors.red;
     }
   }
 
@@ -68,31 +63,35 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     );
   }
 
-  Future<void> _deleteApplication(
-    Internship internship,
-  ) async {
+  Future<void> _viewDetails(Internship internship) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => InternshipDetailsScreen(
+          internship: internship,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteApplication(Internship internship) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Application?'),
         content: Text(
-          'Are you sure you want to delete '
-          '${internship.company}?',
+          'Are you sure you want to delete ${internship.company}?',
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext, false);
-            },
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            onPressed: () {
-              Navigator.pop(dialogContext, true);
-            },
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Delete'),
           ),
         ],
@@ -117,24 +116,105 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     final provider = context.watch<InternshipProvider>();
 
     final applications = provider.internships.where((item) {
-      return _selectedStatus == null ||
+      final matchesStatus = _selectedStatus == null ||
           item.status == _selectedStatus;
+
+      final query = _searchQuery.trim().toLowerCase();
+      final matchesSearch = query.isEmpty ||
+          item.company.toLowerCase().contains(query) ||
+          item.role.toLowerCase().contains(query) ||
+          item.location.toLowerCase().contains(query);
+
+      return matchesStatus && matchesSearch;
     }).toList();
+
+    switch (_sort) {
+      case ApplicationSort.newest:
+        applications.sort(
+          (a, b) => b.appliedDate.compareTo(a.appliedDate),
+        );
+      case ApplicationSort.oldest:
+        applications.sort(
+          (a, b) => a.appliedDate.compareTo(b.appliedDate),
+        );
+      case ApplicationSort.companyAZ:
+        applications.sort(
+          (a, b) => a.company.toLowerCase().compareTo(
+                b.company.toLowerCase(),
+              ),
+        );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Applications'),
-        centerTitle: false,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Text(
-              '${applications.length} application'
-              '${applications.length == 1 ? '' : 's'} found',
-              style: Theme.of(context).textTheme.titleMedium,
+            child: TextField(
+              onChanged: (value) {
+                setState(() => _searchQuery = value);
+              },
+              decoration: InputDecoration(
+                hintText: 'Search company, role or location',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Clear search',
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() => _searchQuery = '');
+                        },
+                      ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${applications.length} application'
+                    '${applications.length == 1 ? '' : 's'} found',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                DropdownButton<ApplicationSort>(
+                  value: _sort,
+                  underline: const SizedBox.shrink(),
+                  items: const [
+                    DropdownMenuItem(
+                      value: ApplicationSort.newest,
+                      child: Text('Newest first'),
+                    ),
+                    DropdownMenuItem(
+                      value: ApplicationSort.oldest,
+                      child: Text('Oldest first'),
+                    ),
+                    DropdownMenuItem(
+                      value: ApplicationSort.companyAZ,
+                      child: Text('Company A–Z'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _sort = value);
+                    }
+                  },
+                ),
+              ],
             ),
           ),
           SizedBox(
@@ -160,8 +240,6 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                     child: FilterChip(
                       label: Text(_statusLabel(status)),
                       selected: _selectedStatus == status,
-                      selectedColor: _statusColor(status)
-                          .withValues(alpha: 0.15),
                       onSelected: (_) {
                         setState(() {
                           _selectedStatus = status;
@@ -185,106 +263,11 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                     itemBuilder: (context, index) {
                       final item = applications[index];
 
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor:
-                                    Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
-                                child: Text(
-                                  item.company.isNotEmpty
-                                      ? item.company[0]
-                                          .toUpperCase()
-                                      : '?',
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.company,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight:
-                                                FontWeight.bold,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(item.role),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      item.location,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      padding:
-                                          const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: _statusColor(item.status)
-                                            .withValues(alpha: 0.12),
-                                        borderRadius:
-                                            BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        _statusLabel(item.status),
-                                        style: TextStyle(
-                                          color: _statusColor(
-                                            item.status,
-                                          ),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    tooltip: 'Edit application',
-                                    onPressed: () =>
-                                        _editApplication(item),
-                                    icon: const Icon(
-                                      Icons.edit_outlined,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    tooltip: 'Delete application',
-                                    onPressed: () =>
-                                        _deleteApplication(item),
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
+                      return ApplicationCard(
+                        internship: item,
+                        onTap: () => _viewDetails(item),
+                        onEdit: () => _editApplication(item),
+                        onDelete: () => _deleteApplication(item),
                       );
                     },
                   ),
@@ -300,7 +283,8 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
   }
 
   Widget _buildEmptyState() {
-    final isFiltered = _selectedStatus != null;
+    final isFiltered =
+        _selectedStatus != null || _searchQuery.trim().isNotEmpty;
 
     return Center(
       child: Padding(
@@ -310,7 +294,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
           children: [
             Icon(
               isFiltered
-                  ? Icons.filter_list_off
+                  ? Icons.search_off
                   : Icons.work_outline,
               size: 64,
               color: Colors.grey,
@@ -318,14 +302,14 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
             const SizedBox(height: 16),
             Text(
               isFiltered
-                  ? 'No applications with this status'
+                  ? 'No matching applications'
                   : 'No applications yet',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
               isFiltered
-                  ? 'Try selecting another filter.'
+                  ? 'Try another search or status filter.'
                   : 'Add your first internship application!',
               textAlign: TextAlign.center,
             ),

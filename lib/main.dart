@@ -7,6 +7,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/applications_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/internship_tips_screen.dart';
+import 'widgets/app_bottom_navigation.dart';
 
 void main() {
   runApp(
@@ -67,35 +68,13 @@ class _MainNavigationScreenState
         index: _selectedIndex,
         children: _screens,
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: AppBottomNavigation(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.work_outline),
-            selectedIcon: Icon(Icons.work),
-            label: 'Applications',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.lightbulb_outline),
-            selectedIcon: Icon(Icons.lightbulb),
-            label: 'Tips',
-          ),
-        ],
       ),
     );
   }
