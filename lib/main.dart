@@ -6,6 +6,7 @@ import 'providers/internship_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/applications_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/internship_tips_screen.dart';
 
 void main() {
   runApp(
@@ -21,28 +22,18 @@ class InternshipTrackerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const seedColor = Color(0xFF4F46E5);
-
     return MaterialApp(
       title: 'Internship Tracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: seedColor),
-        scaffoldBackgroundColor: const Color(0xFFF7F8FC),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFF7F8FC),
-          foregroundColor: Color(0xFF1E293B),
-          elevation: 0,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4F46E5),
         ),
-        cardTheme: CardThemeData(
-          color: Colors.white,
-          elevation: 0,
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        cardTheme: const CardThemeData(
+          elevation: 1,
           margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: Color(0xFFE8EAF2)),
-          ),
         ),
       ),
       home: const MainNavigationScreen(),
@@ -58,13 +49,15 @@ class MainNavigationScreen extends StatefulWidget {
       _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _MainNavigationScreenState
+    extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = const [
     DashboardScreen(),
     ApplicationsScreen(),
     ProfileScreen(),
+    InternshipTipsScreen(),
   ];
 
   @override
@@ -96,6 +89,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Profile',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.lightbulb_outline),
+            selectedIcon: Icon(Icons.lightbulb),
+            label: 'Tips',
           ),
         ],
       ),
