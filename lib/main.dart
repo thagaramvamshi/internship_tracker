@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import 'providers/internship_provider.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/applications_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() {
   runApp(
@@ -32,7 +34,6 @@ class InternshipTrackerApp extends StatelessWidget {
           backgroundColor: Color(0xFFF7F8FC),
           foregroundColor: Color(0xFF1E293B),
           elevation: 0,
-          centerTitle: false,
         ),
         cardTheme: CardThemeData(
           color: Colors.white,
@@ -43,20 +44,61 @@ class InternshipTrackerApp extends StatelessWidget {
             side: const BorderSide(color: Color(0xFFE8EAF2)),
           ),
         ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE0E4EC)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE0E4EC)),
-          ),
-        ),
       ),
-      home: const DashboardScreen(),
+      home: const MainNavigationScreen(),
+    );
+  }
+}
+
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
+
+  @override
+  State<MainNavigationScreen> createState() =>
+      _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = const [
+    DashboardScreen(),
+    ApplicationsScreen(),
+    ProfileScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.work_outline),
+            selectedIcon: Icon(Icons.work),
+            label: 'Applications',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
     );
   }
 }
