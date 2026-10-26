@@ -9,6 +9,7 @@ import 'add_internship_screen.dart';
 import 'edit_internship_screen.dart';
 import 'internship_details_screen.dart';
 
+
 enum ApplicationSort {
   newest,
   oldest,
@@ -111,19 +112,22 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     }
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<InternshipProvider>();
 
     final applications = provider.internships.where((item) {
-      final matchesStatus = _selectedStatus == null ||
-          item.status == _selectedStatus;
+      final matchesStatus =
+          _selectedStatus == null || item.status == _selectedStatus;
 
       final query = _searchQuery.trim().toLowerCase();
       final matchesSearch = query.isEmpty ||
-          item.company.toLowerCase().contains(query) ||
-          item.role.toLowerCase().contains(query) ||
-          item.location.toLowerCase().contains(query);
+    item.company.toLowerCase().contains(query) ||
+    item.role.toLowerCase().contains(query) ||
+    item.location.toLowerCase().contains(query) ||
+    item.type.toLowerCase().contains(query);
 
       return matchesStatus && matchesSearch;
     }).toList();
@@ -148,6 +152,10 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Applications'),
+        actions: [
+          
+          const SizedBox(width: 8),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,9 +259,33 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: applications.isEmpty
+
+          if (_selectedStatus != null || _searchQuery.trim().isNotEmpty)
+  Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    child: Row(
+      children: [
+        const Icon(Icons.filter_alt_outlined, size: 18),
+        const SizedBox(width: 6),
+        const Expanded(
+          child: Text('Filters active'),
+        ),
+        TextButton.icon(
+          onPressed: () {
+            setState(() {
+              _selectedStatus = null;
+              _searchQuery = '';
+            });
+          },
+          icon: const Icon(Icons.clear),
+          label: const Text('Clear filters'),
+        ),
+      ],
+    ),
+  ),
+const SizedBox(height: 8),
+Expanded(
+  child: applications.isEmpty
                 ? _buildEmptyState()
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
@@ -293,9 +325,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isFiltered
-                  ? Icons.search_off
-                  : Icons.work_outline,
+              isFiltered ? Icons.search_off : Icons.work_outline,
               size: 64,
               color: Colors.grey,
             ),
