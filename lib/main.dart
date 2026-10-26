@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/internship_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/applications_screen.dart';
 import 'screens/profile_screen.dart';
@@ -11,8 +12,15 @@ import 'widgets/app_bottom_navigation.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => InternshipProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => InternshipProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+      ],
       child: const InternshipTrackerApp(),
     ),
   );
@@ -23,15 +31,30 @@ class InternshipTrackerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
     return MaterialApp(
       title: 'Internship Tracker',
       debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.themeMode,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4F46E5),
+          brightness: Brightness.light,
         ),
         scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        cardTheme: const CardThemeData(
+          elevation: 1,
+          margin: EdgeInsets.zero,
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF818CF8),
+          brightness: Brightness.dark,
+        ),
         cardTheme: const CardThemeData(
           elevation: 1,
           margin: EdgeInsets.zero,

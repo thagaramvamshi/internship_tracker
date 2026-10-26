@@ -4,12 +4,20 @@ import 'package:provider/provider.dart';
 
 import 'package:internship_tracker/main.dart';
 import 'package:internship_tracker/providers/internship_provider.dart';
+import 'package:internship_tracker/providers/theme_provider.dart';
 
 void main() {
   testWidgets('Internship Tracker dashboard loads', (tester) async {
     await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => InternshipProvider(),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => InternshipProvider(),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => ThemeProvider(),
+          ),
+        ],
         child: const InternshipTrackerApp(),
       ),
     );
