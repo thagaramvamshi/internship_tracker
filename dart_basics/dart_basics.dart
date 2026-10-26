@@ -1,4 +1,4 @@
-
+// ignore_for_file: avoid_print
 void main() {
   // 1. Variables and data types
   String studentName = 'Vamshi';
