@@ -9,6 +9,7 @@ import 'screens/applications_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/internship_tips_screen.dart';
 import 'widgets/app_bottom_navigation.dart';
+import 'providers/profile_provider.dart';
 
 void main() {
   runApp(
@@ -20,6 +21,9 @@ void main() {
         ChangeNotifierProvider(
           create: (_) => ThemeProvider(),
         ),
+        ChangeNotifierProvider(
+  create: (_) => ProfileProvider(),
+),
       ],
       child: const InternshipTrackerApp(),
     ),
