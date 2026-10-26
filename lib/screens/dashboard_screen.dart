@@ -14,6 +14,38 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<InternshipProvider>();
     final internships = provider.internships;
+    final totalApplications = internships.length;
+final selectionRate = totalApplications == 0
+    ? 0.0
+    : provider.selectedCount / totalApplications * 100;
+
+final statusBreakdown = <Map<String, dynamic>>[
+  {
+    'label': 'Applied',
+    'count': provider.appliedCount,
+    'color': Colors.blue,
+  },
+  {
+    'label': 'Assessment',
+    'count': provider.assessmentCount,
+    'color': Colors.orange,
+  },
+  {
+    'label': 'Interview',
+    'count': provider.interviewCount,
+    'color': Colors.purple,
+  },
+  {
+    'label': 'Selected',
+    'count': provider.selectedCount,
+    'color': Colors.green,
+  },
+  {
+    'label': 'Rejected',
+    'count': provider.rejectedCount,
+    'color': Colors.red,
+  },
+];
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final nextWeek = today.add(const Duration(days: 7));
@@ -73,7 +105,109 @@ class DashboardScreen extends StatelessWidget {
                 fontSize: 15,
               ),
             ),
+            
             const SizedBox(height: 24),
+
+            const Text(
+              'Application Insights',
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Selection Rate',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${selectionRate.toStringAsFixed(1)}%',
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              '$totalApplications total applications',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: selectionRate / 100,
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Status Breakdown',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 16),
+                    if (totalApplications == 0)
+                      const Text(
+                        'Add applications to see your progress here.',
+                      )
+                    else
+                      ...statusBreakdown.map((item) {
+                        final count = item['count'] as int;
+                        final color = item['color'] as Color;
+                        final label = item['label'] as String;
+                        final progress = count / totalApplications;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(child: Text(label)),
+                                  Text(
+                                    '$count',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 7,
+                                color: color,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Deadline overview
+
             const Text(
               'Application Overview',
               style: TextStyle(
