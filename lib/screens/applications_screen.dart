@@ -14,6 +14,9 @@ enum ApplicationSort {
   newest,
   oldest,
   companyAZ,
+  deadlineSoonest,
+  deadlineLatest,
+  statusAZ,
 }
 
 class ApplicationsScreen extends StatefulWidget {
@@ -132,22 +135,47 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       return matchesStatus && matchesSearch;
     }).toList();
 
+    
     switch (_sort) {
       case ApplicationSort.newest:
         applications.sort(
           (a, b) => b.appliedDate.compareTo(a.appliedDate),
         );
+
       case ApplicationSort.oldest:
         applications.sort(
           (a, b) => a.appliedDate.compareTo(b.appliedDate),
         );
+
       case ApplicationSort.companyAZ:
         applications.sort(
           (a, b) => a.company.toLowerCase().compareTo(
                 b.company.toLowerCase(),
               ),
         );
+
+      case ApplicationSort.deadlineSoonest:
+        applications.sort((a, b) {
+          if (a.deadline == null && b.deadline == null) return 0;
+          if (a.deadline == null) return 1;
+          if (b.deadline == null) return -1;
+          return a.deadline!.compareTo(b.deadline!);
+        });
+
+      case ApplicationSort.deadlineLatest:
+        applications.sort((a, b) {
+          if (a.deadline == null && b.deadline == null) return 0;
+          if (a.deadline == null) return 1;
+          if (b.deadline == null) return -1;
+          return b.deadline!.compareTo(a.deadline!);
+        });
+
+      case ApplicationSort.statusAZ:
+        applications.sort(
+          (a, b) => a.status.name.compareTo(b.status.name),
+        );
     }
+
 
     return Scaffold(
       appBar: AppBar(
@@ -215,6 +243,20 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                       value: ApplicationSort.companyAZ,
                       child: Text('Company A–Z'),
                     ),
+                    
+                    DropdownMenuItem(
+                      value: ApplicationSort.deadlineSoonest,
+                      child: Text('Deadline — Earliest'),
+                    ),
+                    DropdownMenuItem(
+                      value: ApplicationSort.deadlineLatest,
+                      child: Text('Deadline — Latest'),
+                    ),
+                    DropdownMenuItem(
+                      value: ApplicationSort.statusAZ,
+                      child: Text('Status A–Z'),
+                    ),
+
                   ],
                   onChanged: (value) {
                     if (value != null) {
