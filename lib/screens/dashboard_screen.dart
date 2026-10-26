@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/internship.dart';
 import '../providers/internship_provider.dart';
 import '../widgets/application_card.dart';
 import '../widgets/stat_card.dart';
@@ -12,6 +13,36 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<InternshipProvider>();
+    final internships = provider.internships;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final nextWeek = today.add(const Duration(days: 7));
+
+    final upcomingDeadlines = internships.where((internship) {
+      final deadline = internship.deadline;
+      if (deadline == null ||
+          internship.status == InternshipStatus.selected ||
+          internship.status == InternshipStatus.rejected) {
+        return false;
+      }
+
+      final date = DateTime(deadline.year, deadline.month, deadline.day);
+      return !date.isBefore(today) && !date.isAfter(nextWeek);
+    }).toList()
+      ..sort((a, b) => a.deadline!.compareTo(b.deadline!));
+
+    final overdueDeadlines = internships.where((internship) {
+      final deadline = internship.deadline;
+      if (deadline == null ||
+          internship.status == InternshipStatus.selected ||
+          internship.status == InternshipStatus.rejected) {
+        return false;
+      }
+
+      final date = DateTime(deadline.year, deadline.month, deadline.day);
+      return date.isBefore(today);
+    }).toList()
+      ..sort((a, b) => a.deadline!.compareTo(b.deadline!));
 
     return Scaffold(
       appBar: AppBar(
@@ -66,11 +97,11 @@ class DashboardScreen extends StatelessWidget {
                     SizedBox(
                       width: cardWidth,
                       child: StatCard(
-  title: 'Total',
-  count: provider.totalCount,
-  icon: Icons.work_outline,
-  color: const Color(0xFF4F46E5),
-),
+                        title: 'Total',
+                        count: provider.totalCount,
+                        icon: Icons.work_outline,
+                        color: const Color(0xFF4F46E5),
+                      ),
                     ),
                     SizedBox(
                       width: cardWidth,
@@ -121,7 +152,76 @@ class DashboardScreen extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
+
+            // Deadline overview
+            const Text(
+              'Deadline Overview',
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _DeadlineSummaryCard(
+                    title: 'Upcoming (7 days)',
+                    count: upcomingDeadlines.length,
+                    icon: Icons.event_available,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _DeadlineSummaryCard(
+                    title: 'Overdue',
+                    count: overdueDeadlines.length,
+                    icon: Icons.warning_amber_rounded,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            if (overdueDeadlines.isNotEmpty) ...[
+              const Text(
+                'Overdue Applications',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ...overdueDeadlines.map(
+                (internship) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ApplicationCard(internship: internship),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (upcomingDeadlines.isNotEmpty) ...[
+              const Text(
+                'Upcoming Deadlines',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF166534),
+                ),
+              ),
+              const SizedBox(height: 10),
+              ...upcomingDeadlines.map(
+                (internship) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ApplicationCard(internship: internship),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -172,7 +272,7 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            if (provider.internships.isEmpty)
+            if (internships.isEmpty)
               const Card(
                 child: Padding(
                   padding: EdgeInsets.all(24),
@@ -199,14 +299,55 @@ class DashboardScreen extends StatelessWidget {
                 ),
               )
             else
-              ...provider.internships.reversed.take(5).map(
+              ...internships.reversed.take(5).map(
                     (internship) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
-                      child: ApplicationCard(
-                        internship: internship,
-                      ),
+                      child: ApplicationCard(internship: internship),
                     ),
                   ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeadlineSummaryCard extends StatelessWidget {
+  final String title;
+  final int count;
+  final IconData icon;
+  final Color color;
+
+  const _DeadlineSummaryCard({
+    required this.title,
+    required this.count,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 10),
+            Text(
+              '$count',
+              style: TextStyle(
+                color: color,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 12),
+            ),
           ],
         ),
       ),

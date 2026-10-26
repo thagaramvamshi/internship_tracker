@@ -20,6 +20,31 @@ class ApplicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deadline = internship.deadline;
+    final now = DateTime.now();
+
+    final today = DateTime(now.year, now.month, now.day);
+    final deadlineDay = deadline == null
+        ? null
+        : DateTime(deadline.year, deadline.month, deadline.day);
+
+    final isOverdue =
+        deadlineDay != null && deadlineDay.isBefore(today);
+    final isDueToday =
+        deadlineDay != null && deadlineDay == today;
+
+    final deadlineColor = isOverdue
+        ? Colors.red
+        : isDueToday
+            ? Colors.orange
+            : Colors.green;
+
+    final deadlineLabel = isOverdue
+        ? 'Overdue'
+        : isDueToday
+            ? 'Due today'
+            : 'Upcoming';
+
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -59,6 +84,40 @@ class ApplicationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     StatusBadge(status: internship.status),
+                    if (deadline != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_month,
+                            size: 16,
+                            color: deadlineColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              'Deadline: ${deadline.day.toString().padLeft(2, '0')}/'
+                              '${deadline.month.toString().padLeft(2, '0')}/'
+                              '${deadline.year}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: deadlineColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            deadlineLabel,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: deadlineColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
