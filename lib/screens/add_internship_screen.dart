@@ -184,6 +184,7 @@ class _AddInternshipScreenState extends State<AddInternshipScreen> {
     );
   }
 
+  
   Widget _buildField({
     required TextEditingController controller,
     required String label,
@@ -196,21 +197,31 @@ class _AddInternshipScreenState extends State<AddInternshipScreen> {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      textCapitalization: label.startsWith('Application URL')
+          ? TextCapitalization.none
+          : TextCapitalization.sentences,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
         alignLabelWithHint: maxLines > 1,
       ),
       validator: (value) {
-        if (requiredField && (value == null || value.trim().isEmpty)) {
+        final text = value?.trim() ?? '';
+
+        if (requiredField && text.isEmpty) {
           return '$label is required';
         }
 
-        if (label.startsWith('Application URL') &&
-            value != null &&
-            value.trim().isNotEmpty &&
-            Uri.tryParse(value.trim())?.hasAbsolutePath != true) {
-          return 'Enter a valid URL';
+        if (label.startsWith('Application URL') && text.isNotEmpty) {
+          final uri = Uri.tryParse(text);
+
+          if (uri == null ||
+              !uri.hasScheme ||
+              (uri.scheme != 'http' && uri.scheme != 'https') ||
+              uri.host.isEmpty ||
+              !uri.host.contains('.')) {
+            return 'Enter a valid URL (e.g. https://company.com)';
+          }
         }
 
         return null;
