@@ -1,11 +1,5 @@
 
-enum InternshipStatus {
-  applied,
-  assessment,
-  interview,
-  selected,
-  rejected,
-}
+enum InternshipStatus { applied, assessment, interview, selected, rejected }
 
 class Internship {
   final String id;
@@ -33,6 +27,45 @@ class Internship {
     this.interviewDate,
     this.status = InternshipStatus.applied,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'company': company,
+      'role': role,
+      'location': location,
+      'type': type,
+      'description': description,
+      'applicationUrl': applicationUrl,
+      'appliedDate': appliedDate.toIso8601String(),
+      'deadline': deadline?.toIso8601String(),
+      'interviewDate': interviewDate?.toIso8601String(),
+      'status': status.name,
+    };
+  }
+
+  factory Internship.fromJson(Map<String, dynamic> json) {
+    return Internship(
+      id: json['id'] as String,
+      company: json['company'] as String,
+      role: json['role'] as String,
+      location: json['location'] as String,
+      type: json['type'] as String,
+      description: json['description'] as String? ?? '',
+      applicationUrl: json['applicationUrl'] as String? ?? '',
+      appliedDate: DateTime.parse(json['appliedDate'] as String),
+      deadline: json['deadline'] == null
+          ? null
+          : DateTime.parse(json['deadline'] as String),
+      interviewDate: json['interviewDate'] == null
+          ? null
+          : DateTime.parse(json['interviewDate'] as String),
+      status: InternshipStatus.values.firstWhere(
+        (value) => value.name == json['status'],
+        orElse: () => InternshipStatus.applied,
+      ),
+    );
+  }
 
   Internship copyWith({
     String? company,
