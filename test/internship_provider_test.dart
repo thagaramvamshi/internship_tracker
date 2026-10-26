@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internship_tracker/models/internship.dart';
 import 'package:internship_tracker/providers/internship_provider.dart';
@@ -7,10 +6,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-setUp(() {
-  SharedPreferences.setMockInitialValues({});
-});
   late InternshipProvider provider;
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    provider = InternshipProvider();
+  });
+
+  tearDown(() {
+    provider.dispose();
+  });
 
   Internship createInternship({
     String id = '1',
@@ -28,14 +33,6 @@ setUp(() {
     );
   }
 
-  setUp(() {
-    provider = InternshipProvider();
-  });
-
-  tearDown(() {
-    provider.dispose();
-  });
-
   test('adds an internship and updates total count', () {
     provider.addInternship(createInternship());
 
@@ -47,18 +44,14 @@ setUp(() {
   test('updates internship details and status counts', () {
     provider.addInternship(createInternship());
 
-    final updated = createInternship(
-      company: 'Google',
-      status: InternshipStatus.interview,
-    );
+    final updated = createInternship(status: InternshipStatus.interview);
 
     provider.updateInternship(updated);
 
     expect(provider.totalCount, 1);
     expect(provider.appliedCount, 0);
     expect(provider.interviewCount, 1);
-    expect(provider.internships.first.status,
-        InternshipStatus.interview);
+    expect(provider.internships.first.status, InternshipStatus.interview);
   });
 
   test('deletes an internship', () {
@@ -81,9 +74,7 @@ setUp(() {
 
   test('returns all internships for an empty search', () {
     provider.addInternship(createInternship());
-    provider.addInternship(
-      createInternship(id: '2', company: 'Microsoft'),
-    );
+    provider.addInternship(createInternship(id: '2', company: 'Microsoft'));
 
     expect(provider.search('').length, 2);
     expect(provider.search('   ').length, 2);
