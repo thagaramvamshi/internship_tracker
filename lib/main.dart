@@ -64,7 +64,11 @@ class InternshipTrackerApp extends StatelessWidget {
           margin: EdgeInsets.zero,
         ),
       ),
-      home: const MainNavigationScreen(),
+      initialRoute: '/',
+routes: {
+  '/': (context) => const MainNavigationScreen(),
+  '/career-tips': (context) => const InternshipTipsScreen(),
+},
     );
   }
 }

@@ -367,7 +367,7 @@ final statusBreakdown = <Map<String, dynamic>>[
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
@@ -405,6 +405,20 @@ final statusBreakdown = <Map<String, dynamic>>[
                 color: Color(0xFF1E293B),
               ),
             ),
+            
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/career-tips');
+                    },
+                    icon: const Icon(Icons.lightbulb_outline),
+                    label: const Text('Explore Career Tips'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white70),
+                    ),
+                  ),
+
             const SizedBox(height: 12),
             if (internships.isEmpty)
               const Card(
