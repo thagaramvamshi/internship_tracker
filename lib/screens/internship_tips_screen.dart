@@ -11,8 +11,7 @@ class InternshipTipsScreen extends StatefulWidget {
       _InternshipTipsScreenState();
 }
 
-class _InternshipTipsScreenState
-    extends State<InternshipTipsScreen> {
+class _InternshipTipsScreenState extends State<InternshipTipsScreen> {
   final TipsService _tipsService = TipsService();
 
   late Future<CareerTip> _tipFuture;
@@ -20,19 +19,13 @@ class _InternshipTipsScreenState
   @override
   void initState() {
     super.initState();
-    _loadTip();
+    _tipFuture = _tipsService.fetchTip();
   }
 
   void _loadTip() {
-    setStateIfMounted(() {
+    setState(() {
       _tipFuture = _tipsService.fetchTip();
     });
-  }
-
-  void setStateIfMounted(VoidCallback callback) {
-    if (mounted) {
-      setState(callback);
-    }
   }
 
   @override
@@ -40,6 +33,13 @@ class _InternshipTipsScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Career Tips'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh tip',
+            onPressed: _loadTip,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -49,8 +49,7 @@ class _InternshipTipsScreenState
             child: FutureBuilder<CareerTip>(
               future: _tipFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState ==
-                    ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -61,7 +60,7 @@ class _InternshipTipsScreenState
                   );
                 }
 
-                if (snapshot.hasError) {
+                if (snapshot.hasError || !snapshot.hasData) {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -100,32 +99,24 @@ class _InternshipTipsScreenState
                         Icon(
                           Icons.lightbulb_outline,
                           size: 56,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(height: 20),
                         Text(
                           'A Little Inspiration',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall,
+                          style: Theme.of(context).textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 20),
                         Text(
                           '“${tip.text}”',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge,
+                          style: Theme.of(context).textTheme.titleLarge,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           '— ${tip.author}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium,
+                          style: Theme.of(context).textTheme.bodyMedium,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
