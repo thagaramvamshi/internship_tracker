@@ -232,9 +232,10 @@ final statusBreakdown = <Map<String, dynamic>>[
                       width: cardWidth,
                       child: StatCard(
                         title: 'Total',
-                        count: provider.totalCount,
+                        count: totalApplications,
                         icon: Icons.work_outline,
-                        color: const Color(0xFF4F46E5),
+                        color: Colors.blue,
+                        animationDelay: 0,
                       ),
                     ),
                     SizedBox(
@@ -243,7 +244,8 @@ final statusBreakdown = <Map<String, dynamic>>[
                         title: 'Applied',
                         count: provider.appliedCount,
                         icon: Icons.send_outlined,
-                        color: Colors.blue,
+                        color: Colors.lightBlue,
+                        animationDelay: 600,
                       ),
                     ),
                     SizedBox(
@@ -253,6 +255,7 @@ final statusBreakdown = <Map<String, dynamic>>[
                         count: provider.interviewCount,
                         icon: Icons.groups_outlined,
                         color: Colors.purple,
+                        animationDelay: 1200,
                       ),
                     ),
                     SizedBox(
@@ -262,6 +265,7 @@ final statusBreakdown = <Map<String, dynamic>>[
                         count: provider.assessmentCount,
                         icon: Icons.assignment_outlined,
                         color: Colors.orange,
+                        animationDelay: 1800,
                       ),
                     ),
                     SizedBox(
@@ -271,6 +275,7 @@ final statusBreakdown = <Map<String, dynamic>>[
                         count: provider.selectedCount,
                         icon: Icons.check_circle_outline,
                         color: Colors.green,
+                        animationDelay: 2400,
                       ),
                     ),
                     SizedBox(
@@ -280,6 +285,7 @@ final statusBreakdown = <Map<String, dynamic>>[
                         count: provider.rejectedCount,
                         icon: Icons.cancel_outlined,
                         color: Colors.red,
+                        animationDelay: 3000,
                       ),
                     ),
                   ],
